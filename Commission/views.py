@@ -25,11 +25,6 @@ class SalesForm(Form):
     barrels = IntegerField('barrels', validators=[NumberRange(0, 70)])
 
 
-class QuerySalesForm(Form):
-    salesman = SelectField("salesman")
-    start = DateField('start')
-    end = DateField('end')
-
 
 @app.before_request
 def before_request():
@@ -82,13 +77,20 @@ def login():
                 if request.form['password'] != user.password:
                     error = 'Invalid password'
                 else:
-                    flash('You were logged in')
                     session['user_id'] = user.id
                     session['user_level'] = user.level
                     return redirect(url_for('salesman_index'))
     if error:
-        flash(error)
+        flash(error, category='error')
     return render_template("login.html", form=form, title="Login")
+
+
+@app.route('/logout')
+def logout():
+    """Logs the user out."""
+    flash('You were logged out', category='info')
+    session.pop('user_id', None)
+    return redirect(url_for('index'))
 
 
 @app.route("/salesman", methods=["GET"])
@@ -108,17 +110,16 @@ def sale():
         sale = Sales(saler_id=g.user.id, locks=locks, stocks=stocks,
                      barrels=barrels, date=date.today())
         sale.save()
-        flash("Success")
+        flash("Success", category='success')
     else:
-        flash("Input not valid")
+        flash("Input not valid", category='error')
     return redirect(url_for('salesman_index'))
 
 
 @app.route("/query", methods=["GET"])
 def query_sales():
-    form = QuerySalesForm()
-    form.salesman.choices = [(g.user.id, g.user.username)]
-    return render_template('query_index.html', form=form, title="query")
+    allowed_users = [g.user]
+    return render_template('query_index.html', title="Query", users=allowed_users)
 
 
 def date_from_string(_str):
@@ -128,12 +129,13 @@ def date_from_string(_str):
 
 @app.route("/do_query", methods=["POST"])
 def do_query():
-    salesman_id = request.form['salesman']
+    salesman_id = request.form['id']
     start_date = date_from_string(request.form['start'])
     end_date = date_from_string(request.form['end'])
-    print(start_date)
-    print(type(end_date))
-    print(end_date)
+    if start_date > end_date:
+        flash("Date not valid", category='error')
+        return redirect(url_for('query_sales'))
+
     sales = Sales.select().where(
         Sales.saler_id == salesman_id, start_date < date)
     return render_template('query_result.html', sales=sales)

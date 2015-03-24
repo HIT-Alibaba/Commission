@@ -9,9 +9,7 @@ app = Flask(__name__)
 app.config['SECRET_KEY'] = 'MYCOMMISSION'
 
 class MyModelView(ModelView):
-
-    def is_accessible(self):
-        return hasattr(g, 'admin') and g.admin == True
+    pass
 
 admin = Admin(app, name='Commission Admin')
 admin.add_view(MyModelView(User))

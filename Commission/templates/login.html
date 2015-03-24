@@ -1,12 +1,52 @@
 {% extends 'base.html' %}
 {% block body %}
+
+<div class="container">
+    <nav class="navbar navbar-default" role="navigation">
+     <div class="container-fluid">
+	<!-- Brand and toggle get grouped for better mobile display -->
+	<div class="navbar-header">
+		 <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+	        <span class="sr-only">Toggle navigation</span>
+	        <span class="icon-bar"></span>
+	        <span class="icon-bar"></span>
+	        <span class="icon-bar"></span>
+	      </button>
+	      <a class="navbar-brand" href="#">Commission</a>
+	  	</div>
+
+		</div>
+	</nav>
+
+{% for category, message in get_flashed_messages(with_categories=True) %}
+{% if category == 'success' %}
+<div class="alert alert-success" role="alert">{{ message }}</div>
+{% elif category == 'info' %}
+<div class="alert alert-info" role="alert">{{ message }}</div>
+{% elif category == 'error' %}
+<div class="alert alert-danger" role="alert">{{ message }}</div>
+{% endif %}
+{% endfor %}
+
+<div class="row">
+
+<div class="col-md-4 col-md-offset-4">
+
 <form method="POST" action="/login">
     {{ form.csrf_token }}
-    {{ form.name.label }} {{ form.name(size=20) }}
-    {{ form.password.label }} {{ form.password(size=20)}}
-    <input type="submit" value="登陆">
-    {% for message in get_flashed_messages() %}
-    <div class=flash>{{ message }}</div>
-    {% endfor %}
+ <div class="form-group">
+ <label>{{ form.name.label }} </label>
+    {{ form.name(size=40) }}
+ </div>
+ <div class="form-group">
+ <label>{{ form.password.label }}</label> 
+ {{ form.password(size=40)}}
+ </div>
+
+ <center><button type="submit" class="btn btn-default">Login</button></center>
 </form>
+
+</div>
+</div>
+</div>
 {% endblock %}
