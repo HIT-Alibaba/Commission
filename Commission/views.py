@@ -10,7 +10,7 @@ from models import User
 from peewee import *
 
 from flask_wtf import Form
-from wtforms import StringField, PasswordField, IntegerField
+from wtforms import StringField, PasswordField, IntegerField, SelectField, DateField
 from wtforms.validators import DataRequired, NumberRange
 
 
@@ -24,6 +24,10 @@ class SalesForm(Form):
     stocks = IntegerField('stocks', validators=[NumberRange(0, 80)])
     barrels = IntegerField('barrels', validators=[NumberRange(0, 70)])
 
+class QuerySalesForm(Form):
+    salesman = SelectField("salesman")
+    start = DateField('start')
+    end = DateField('end')
 
 @app.before_request
 def before_request():
@@ -78,26 +82,40 @@ def login():
                     flash('You were logged in')
                     session['user_id'] = user.id
                     session['user_level'] = user.level
-                    return redirect(url_for('salesman_index', id=user.id))
+                    return redirect(url_for('salesman_index'))
     if error:
         flash(error)
     return render_template("login.html", form=form, title="Login")
 
 
-@app.route("/salesman/<int:id>", methods=["GET"])
-def salesman_index(id):
+@app.route("/salesman", methods=["GET"])
+def salesman_index():
     form = SalesForm()
     return render_template('salesman_index.html', form=form, title="Salesman")
 
 
 @login_required
-@app.route("/do_sale", methods=['POST'])
+@app.route("/do_sale", methods=["POST"])
 def sale():
-    locks = request.form['locks']
-    stocks = request.form['stocks']
-    barrels = request.form['barrels']
-    sale = Sales(saler_id=g.user.id, locks=locks, stocks=stocks,
-                 barrels=barrels, date=date.today())
-    sale.save()
-    flash("Success")
-    return redirect(url_for('salesman_index', id=g.user.id))
+    form = SalesForm()
+    if form.validate_on_submit():
+        locks = request.form['locks']
+        stocks = request.form['stocks']
+        barrels = request.form['barrels']
+        sale = Sales(saler_id=g.user.id, locks=locks, stocks=stocks,
+                     barrels=barrels, date=date.today())
+        sale.save()
+        flash("Success")
+    else:
+        flash("Input not valid")
+    return redirect(url_for('salesman_index'))
+
+@app.route("/query", methods=["GET"])
+def query_sales():
+    form = QuerySalesForm()
+    form.salesman.choices = [(g.user.id, g.user.username)]
+    return render_template('query_index.html', form=form ,title="query")
+
+@app.route("/do_query", methods=["POST"])
+def do_query():
+    pass

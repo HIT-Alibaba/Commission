@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+{% block body %}
+
+<form method="POST" action="/do_query">
+    {{ form.csrf_token }}
+    {{ form.salesman.label }} {{ form.salesman(size=10) }}
+    {{ form.start.label }} {{ form.start(size=10)}}
+    {{ form.end.label }} {{ form.end(size=10)}}
+    
+    <input type="submit" value="提交">
+    {% for message in get_flashed_messages() %}
+    <div class=flash>{{ message }}</div>
+    {% endfor %}
+
+{% endblock %}
