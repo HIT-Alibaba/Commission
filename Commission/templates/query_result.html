@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+
+{% block body %}
+
+{% for sale in sales %}
+
+<p>{{ sale.locks }}</p>
+<p>{{ sale.stocks }}</p>
+<p>{{ sale.barrels }}</p>
+
+{% endfor %}
+
+
+{% endblock %}

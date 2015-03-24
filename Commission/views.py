@@ -24,15 +24,16 @@ class SalesForm(Form):
     stocks = IntegerField('stocks', validators=[NumberRange(0, 80)])
     barrels = IntegerField('barrels', validators=[NumberRange(0, 70)])
 
+
 class QuerySalesForm(Form):
     salesman = SelectField("salesman")
     start = DateField('start')
     end = DateField('end')
 
+
 @app.before_request
 def before_request():
     g.user = None
-    g.admin = None
     if 'user_id' in session:
         try:
             g.user = User.get(User.id == session['user_id'])
@@ -65,6 +66,8 @@ def index():
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
+    if g.user:
+        return redirect(url_for('salesman_index'))
     form = LoginForm()
     error = None
     if request.method == 'POST':
@@ -110,12 +113,27 @@ def sale():
         flash("Input not valid")
     return redirect(url_for('salesman_index'))
 
+
 @app.route("/query", methods=["GET"])
 def query_sales():
     form = QuerySalesForm()
     form.salesman.choices = [(g.user.id, g.user.username)]
-    return render_template('query_index.html', form=form ,title="query")
+    return render_template('query_index.html', form=form, title="query")
+
+
+def date_from_string(_str):
+    year, month, day = _str.split('-')
+    return date(int(year), int(month), int(day))
+
 
 @app.route("/do_query", methods=["POST"])
 def do_query():
-    pass
+    salesman_id = request.form['salesman']
+    start_date = date_from_string(request.form['start'])
+    end_date = date_from_string(request.form['end'])
+    print(start_date)
+    print(type(end_date))
+    print(end_date)
+    sales = Sales.select().where(
+        Sales.saler_id == salesman_id, start_date < date)
+    return render_template('query_result.html', sales=sales)
