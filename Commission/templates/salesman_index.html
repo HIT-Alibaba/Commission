@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+{% block body %}
+
+{% if g.user %}
+<p>
+{{ g.user.username }} , 你好
+</p>
+
+<form method="POST" action="/do_sale">
+    {{ form.csrf_token }}
+    {{ form.locks.label }} {{ form.locks(size=10) }}
+    {{ form.stocks.label }} {{ form.stocks(size=10)}}
+    {{ form.barrels.label }} {{ form.barrels(size=10)}}
+    
+    <input type="submit" value="提交">
+    {% for message in get_flashed_messages() %}
+    <div class=flash>{{ message }}</div>
+    {% endfor %}
+</form>
+
+
+{% endif %}
+{% endblock %}
