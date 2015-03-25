@@ -6,7 +6,6 @@ from Commission import User, Sales
 
 from flask import render_template, flash, request, g, session, redirect, url_for
 
-from models import User
 from peewee import *
 
 from flask_wtf import Form
@@ -23,7 +22,6 @@ class SalesForm(Form):
     locks = IntegerField('locks', validators=[NumberRange(0, 70)])
     stocks = IntegerField('stocks', validators=[NumberRange(0, 80)])
     barrels = IntegerField('barrels', validators=[NumberRange(0, 70)])
-
 
 
 @app.before_request
