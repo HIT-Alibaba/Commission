@@ -96,7 +96,9 @@ def logout():
 @app.route("/salesman", methods=["GET"])
 def salesman_index():
     form = SalesForm()
-    return render_template('salesman_index.html', form=form, title="Salesman")
+    d = date.today()
+    total_locks, total_stocks, total_barrels = get_total_sales(g.user, d.year, d.month)
+    return render_template('salesman_index.html', form=form, title="Salesman", total_locks=total_locks, total_stocks=total_stocks, total_barrels=total_barrels)
 
 
 @login_required
@@ -119,9 +121,6 @@ def sale():
 @app.route("/query", methods=["GET"])
 def query_sales():
     allowed_users = [g.user]
-    user = g.user
-    total_locks, total_stocks, total_barrels = get_available_goods(user, 2015, 3)
-    print("#########" + str(total_locks))
     return render_template('query_index.html', title="Query", users=allowed_users)
 
 

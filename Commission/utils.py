@@ -11,12 +11,12 @@ def date_from_string(_str):
     return date(int(year), int(month), int(day))
 
 
-def get_available_goods(user, year, month):
+def get_total_sales(user, year, month):
     _sales = []
     target_date_start = date(int(year), int(month), 1)
     target_date_end = date(int(year), int(month + 1), 1)
     for sale in user.sales:
-        if target_date_start < sale.date < target_date_end:
+        if target_date_start <= sale.date < target_date_end:
             _sales.append(sale)
 
     total_locks = 0
@@ -42,6 +42,6 @@ def get_commission(total_locks, total_stocks, total_barrels):
     elif total_sales > 1000 and total_sales <= 1800:
         result = 1000 * 0.1 + (total_sales - 1000) * 0.15
     elif total_sales > 1800:
-        result = 1000 * 0.1 + 800 + 0.15 + (total_sales - 1800) * 0.2
+        result = 1000 * 0.1 + 800 * 0.15 + (total_sales - 1800) * 0.2
 
     return result
