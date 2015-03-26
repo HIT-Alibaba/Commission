@@ -5,6 +5,9 @@ LOCKS_PRICE = 45
 STOCKS_PRICE = 30
 BARRELS_PRICE = 25
 
+AVAILABLE_LOCKS = 70
+AVAILABLE_STOCKS = 80
+AVAILABLE_BARRELS = 90
 
 def date_from_string(_str):
     year, month, day = _str.split('-')
@@ -22,11 +25,14 @@ def get_total_sales(user, year, month):
     total_locks = 0
     total_stocks = 0
     total_barrels = 0
+    early_finish = False
     for sale in _sales:
         total_locks += sale.locks
         total_stocks += sale.stocks
         total_barrels += sale.barrels
-    return (total_locks, total_stocks, total_barrels)
+        if sale.locks == -1:
+            early_finish = True
+    return (total_locks, total_stocks, total_barrels, early_finish)
 
 
 def is_qualified_for_commission(total_locks, total_stocks, total_barrels):

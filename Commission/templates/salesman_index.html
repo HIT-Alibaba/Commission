@@ -47,27 +47,67 @@ Hello, {{ g.user.username }}
  <div class="col-md-4 col-md-offset-4">
  <h3>New sale</h3>
  <br>
-<form method="POST" action="/do_sale">
-{{ form.csrf_token }}
+<form method="POST" action="/do_sale" id="sales_form">
 <div class="form-group">
-    <label for="inputLocks">{{ form.locks.label }}&nbsp;&nbsp;&nbsp;</label>
-     {{ form.locks(size=40) }}
+    <label for="inputLocks">Locks &nbsp;({{ left_locks }})</label>
+    <input class="form-control" type="number" min="0" max="{{ left_locks }}" value="0" required name="locks" id="form_locks">
+    </div>
+<div class="form-group">
+    <label for="inputStocks">Stocks ({{ left_stocks }})</label>
+    <input class="form-control" type="number" min="0" max="{{ left_stocks }}" value="0" required name="stocks" id="form_stocks">
 </div>
 <div class="form-group">
-    <label for="inputStocks">{{ form.stocks.label }} </label>
-    {{ form.stocks(size=40)}}
-</div>
-<div class="form-group">
-    <label for="inputBarrels">{{ form.barrels.label }} </label>
-    {{ form.barrels(size=40)}}
+    <label for="inputBarrels">Barrels ({{ left_barrels }})</label>
+     <input class="form-control" type="number" min="0" max="{{ left_barrels }}" value="0" required name="barrels" id="form_barrels">
 </div>
 
- <center><button type="submit" class="btn btn-default">Submit</button></center>
+ <button type="submit" {% if early_finish or (left_locks == 0 and left_stocks == 0 and left_barrels == 0) %} disabled="disabled" {% endif %} class="btn btn-default">Submit</button>
+
+&nbsp;
+<button onclick="return finishThisMonth()" {% if early_finish or (left_locks == 0 and left_stocks == 0 and left_barrels == 0) %} disabled="disabled" {% endif %} class="btn btn-default">Finish this month</button>
+
+&nbsp;
+
+<button onclick="return openMonthReport()" {% if not(early_finish or (left_locks == 0 and left_stocks == 0 and left_barrels == 0)) %} disabled="disabled" {% endif %} class="btn btn-default">Monthly Report</button>
+
 </form>
 </div>
-</div>
+
+
 
 </div>
+</div>
 
+<script type="text/javascript">
+
+var checkInput = function() {
+	var locks = $("#form_locks");
+	var stocks = $("form_stocks");
+	var barrels = $("form_barrels")
+
+	if (locks.val() == 0 && stocks.val() == 0 && barrels.val() == 0) {
+		return false;
+	}
+	return true;
+}
+
+var finishThisMonth = function() {
+	var locks = $("#form_locks");
+	var stocks = $("form_stocks");
+	var barrels = $("form_barrels");
+	locks.attr("min", "-1");
+	stocks.attr("min", "-1");
+	barrels.attr("min", "-1");
+	locks.val("-1");
+	stocks.val("-1");
+	barrels.val("-1");
+
+}
+
+var openMonthReport = function() {
+	location.href = "/query/this_month";
+	return false;
+}
+</script>
 {% endif %}
 {% endblock %}

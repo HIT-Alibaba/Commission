@@ -20,12 +20,6 @@ class LoginForm(Form):
     password = PasswordField('password', validators=[DataRequired()])
 
 
-class SalesForm(Form):
-    locks = IntegerField('locks', validators=[NumberRange(0, 70)])
-    stocks = IntegerField('stocks', validators=[NumberRange(0, 80)])
-    barrels = IntegerField('barrels', validators=[NumberRange(0, 90)])
-
-
 @app.before_request
 def before_request():
     g.user = None
@@ -95,22 +89,43 @@ def logout():
 
 @app.route("/salesman", methods=["GET"])
 def salesman_index():
-    form = SalesForm()
     d = date.today()
-    total_locks, total_stocks, total_barrels = get_total_sales(g.user, d.year, d.month)
-    return render_template('salesman_index.html', form=form, title="Salesman", total_locks=total_locks, total_stocks=total_stocks, total_barrels=total_barrels)
+    total_locks, total_stocks, total_barrels, early_finish = get_total_sales(
+        g.user, d.year, d.month)
+    left_locks = AVAILABLE_LOCKS - total_locks
+    left_stocks = AVAILABLE_STOCKS - total_stocks
+    left_barrels = AVAILABLE_BARRELS - total_barrels
+    if early_finish:
+        left_locks = left_stocks = left_barrels = 0
+    return render_template('salesman_index.html', title="Salesman",
+                           left_locks=left_locks, left_stocks=left_stocks, left_barrels=left_barrels, early_finish=early_finish)
 
 
 @login_required
 @app.route("/do_sale", methods=["POST"])
 def sale():
-    form = SalesForm()
-    if form.validate_on_submit():
-        locks = request.form['locks']
-        stocks = request.form['stocks']
-        barrels = request.form['barrels']
+
+    locks = request.form['locks']
+    stocks = request.form['stocks']
+    barrels = request.form['barrels']
+
+    if int(locks) == -1:
+        sale = Sale(saler=g.user.id, locks=-1, stocks=stocks,
+                    barrels=barrels, date=date.today())
+        sale.save()
+        flash("Finish this Month", category='info')
+        return redirect(url_for('salesman_index'))
+
+    d = date.today()
+    total_locks, total_stocks, total_barrels, early_finish = get_total_sales(
+        g.user, d.year, d.month)
+    left_locks = AVAILABLE_LOCKS - total_locks
+    left_stocks = AVAILABLE_STOCKS - total_stocks
+    left_barrels = AVAILABLE_BARRELS - total_barrels
+
+    if int(locks) <= left_locks and int(stocks) <= left_stocks and int(barrels) <= left_barrels:
         sale = Sale(saler=g.user.id, locks=locks, stocks=stocks,
-                     barrels=barrels, date=date.today())
+                    barrels=barrels, date=date.today())
         sale.save()
         flash("Success", category='success')
     else:
@@ -134,5 +149,19 @@ def do_query():
         return redirect(url_for('query_sales'))
 
     sales = Sales.select().where(
-        Sales.saler_id == salesman_id, start_date < date)
+        Sales.saler_id == salesman_id, start_date < date, locks != -1)
     return render_template('query_result.html', sales=sales, )
+
+@app.route("/query/this_month", methods=["GET"])
+def query_this_month():
+    salesman = g.user
+    d = date.today()
+    start_date = date(d.year, d.month, 1)
+    end_date = date(d.year, d.month + 1, 1)
+
+    results = []
+    for sale in salesman.sales:
+        if start_date <= sale.date < end_date and sale.locks >= 0:
+            results.append(sale)
+    return render_template('query_result.html', sales=results)
+
