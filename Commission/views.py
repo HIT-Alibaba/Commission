@@ -89,6 +89,9 @@ def logout():
 
 @app.route("/salesman", methods=["GET"])
 def salesman_index():
+    if not g.user:
+        return redirect(url_for('login'))
+
     d = date.today()
     total_locks, total_stocks, total_barrels, early_finish = get_total_sales(
         g.user, d.year, d.month)
@@ -150,7 +153,8 @@ def do_query():
 
     sales = Sales.select().where(
         Sales.saler_id == salesman_id, start_date < date, locks != -1)
-    return render_template('query_result.html', sales=sales, )
+    return render_template('query_result.html', sales=sales, title="Query Result", )
+
 
 @app.route("/query/this_month", methods=["GET"])
 def query_this_month():
@@ -163,5 +167,7 @@ def query_this_month():
     for sale in salesman.sales:
         if start_date <= sale.date < end_date and sale.locks >= 0:
             results.append(sale)
-    return render_template('query_result.html', sales=results)
 
+    total_locks, total_stocks, total_barrels,_ = get_total_sales(salesman, d.year, d.month)
+    commission = get_commission(total_locks, total_stocks, total_barrels)
+    return render_template('query_result.html', sales=results, title="Report", total_locks=total_locks, total_stocks=total_stocks, total_barrels=total_barrels, commission=commission)

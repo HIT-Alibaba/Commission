@@ -2,13 +2,133 @@
 
 {% block body %}
 
+<div class="container">
+    <nav class="navbar navbar-default" role="navigation">
+     <div class="container-fluid">
+	<!-- Brand and toggle get grouped for better mobile display -->
+	<div class="navbar-header">
+		 <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+	        <span class="sr-only">Toggle navigation</span>
+	        <span class="icon-bar"></span>
+	        <span class="icon-bar"></span>
+	        <span class="icon-bar"></span>
+	      </button>
+	      <a class="navbar-brand" href="#">Commission</a>
+	  	</div>
+
+	  	<ul class="nav navbar-nav">
+        <li class="active"><a href="/salesman">New sale <span class="sr-only">(current)</span></a></li>
+        <li><a href="/query">Query</a></li>
+        </ul>
+
+		<ul class="nav navbar-nav navbar-right"> 
+		<li><a href="/logout">Logout</a></li>
+		</ul>
+		</div>
+	</nav>
+
+<h3>Report</h3>
+
+<div class="row">
+<div class="col-md-8 col-md-offset-2">
+
+<table class="table">
+<thead>
+<tr>
+	<th>Date</th>
+	<th>Locks</th>
+	<th>Stocks</th>
+	<th>Barrels</th>
+	<th>Sum</th>
+	<th>Volume($)</th>
+</tr>
+</thead>
+<tbody>
 {% for sale in sales %}
 
-<p>{{ sale.locks }}</p>
-<p>{{ sale.stocks }}</p>
-<p>{{ sale.barrels }}</p>
+<tr>
+	<td> {{ sale.date}} </td>
+	<td>{{ sale.locks }}</td>
+	<td>{{ sale.stocks }}</td>
+	<td>{{ sale.barrels }}</td>
+	<td>{{ sale.locks + sale.stocks + sale.barrels }}</td>
+	<td>{{ 45 * sale.locks + 30 * sale.stocks + 25 * sale.barrels }}</td>
+</tr>
 
 {% endfor %}
+</tbody>
+</table>
+</div>
+</div>
 
+<div class="row">
+	<div class="col-md-8 col-md-offset-2">
+		<p>Total Volume($): <span>{{ total_locks * 45 + total_stocks * 30 + total_barrels * 35 }}</span></p>
+		<p>Commission($): <span>{{ commission }}</span></p>
+	</div>
+</div>
 
+<div class="row">
+	<div class="col-md-8 col-md-offset-2">
+	<div id="chart" style="height: 500px; border: 1px solid rgb(204, 204, 204); padding: 10px; background-color: transparent; cursor: default;"></div>
+	</div>
+</div>
+<script type="text/javascript" src="{{ url_for('static', filename='js/echarts-all.js') }}"></script>
+<script type="text/javascript">
+	var myChart = echarts.init(document.getElementById('chart'));
+
+  option = {
+      title : {
+          text: 'Saels Report',
+      },
+      tooltip : {
+          trigger: 'axis'
+      },
+      legend: {
+          data:['Locks','Stocks', 'Barrels']
+      },
+      toolbox: {
+          show : true,
+          feature : {
+              mark : {show: true},
+              dataView : {show: true, readOnly: false},
+              magicType : {show: true, type: ['line', 'bar']},
+              restore : {show: true},
+              saveAsImage : {show: true}
+          }
+      },
+      calculable : true,
+      xAxis : [
+          {
+              type : 'category',
+              data : ['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月']
+          }
+      ],
+      yAxis : [
+          {
+              type : 'value'
+          }
+      ],
+      series : [
+          {
+              name:'Locks',
+              type:'bar',
+              data:[2.0, 4.9, 7.0, 23.2, 25.6, 76.7, 135.6, 162.2, 32.6, 20.0, 6.4, 3.3],
+          },
+          {
+              name:'Stocks',
+              type:'bar',
+              data:[2.6, 5.9, 9.0, 26.4, 28.7, 70.7, 175.6, 182.2, 48.7, 18.8, 6.0, 2.3],
+          },
+          {
+              name:'Barrels',
+              type:'bar',
+              data:[7.8, 5.9, 9.0, 26.4, 28.7, 70.7, 175.6, 182.2, 48.7, 18.8, 6.0, 2.3],
+          }
+
+      ]
+  };
+  myChart.setOption(option);
+                    
+    </script>
 {% endblock %}
