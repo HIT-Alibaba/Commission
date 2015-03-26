@@ -16,12 +16,12 @@ class User(BaseModel):
     level = peewee.IntegerField()
 
 
-class Sales(BaseModel):
-    saler_id = peewee.ForeignKeyField(User)
+class Sale(BaseModel):
+    saler = peewee.ForeignKeyField(User, related_name='sales')
     locks = peewee.IntegerField()
     stocks = peewee.IntegerField()
     barrels = peewee.IntegerField()
-    date = peewee.DateTimeField()
+    date = peewee.DateField()
 
 
 class Admin(BaseModel):

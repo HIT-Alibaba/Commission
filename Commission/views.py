@@ -2,7 +2,7 @@ from datetime import date
 from functools import wraps
 
 from Commission import app
-from Commission import User, Sales
+from Commission import User, Sale
 
 from flask import render_template, flash, request, g, session, redirect, url_for
 
@@ -11,6 +11,8 @@ from peewee import *
 from flask_wtf import Form
 from wtforms import StringField, PasswordField, IntegerField, SelectField, DateField
 from wtforms.validators import DataRequired, NumberRange
+
+from utils import *
 
 
 class LoginForm(Form):
@@ -21,7 +23,7 @@ class LoginForm(Form):
 class SalesForm(Form):
     locks = IntegerField('locks', validators=[NumberRange(0, 70)])
     stocks = IntegerField('stocks', validators=[NumberRange(0, 80)])
-    barrels = IntegerField('barrels', validators=[NumberRange(0, 70)])
+    barrels = IntegerField('barrels', validators=[NumberRange(0, 90)])
 
 
 @app.before_request
@@ -105,7 +107,7 @@ def sale():
         locks = request.form['locks']
         stocks = request.form['stocks']
         barrels = request.form['barrels']
-        sale = Sales(saler_id=g.user.id, locks=locks, stocks=stocks,
+        sale = Sale(saler=g.user.id, locks=locks, stocks=stocks,
                      barrels=barrels, date=date.today())
         sale.save()
         flash("Success", category='success')
@@ -117,12 +119,10 @@ def sale():
 @app.route("/query", methods=["GET"])
 def query_sales():
     allowed_users = [g.user]
+    user = g.user
+    total_locks, total_stocks, total_barrels = get_available_goods(user, 2015, 3)
+    print("#########" + str(total_locks))
     return render_template('query_index.html', title="Query", users=allowed_users)
-
-
-def date_from_string(_str):
-    year, month, day = _str.split('-')
-    return date(int(year), int(month), int(day))
 
 
 @app.route("/do_query", methods=["POST"])
@@ -136,4 +136,4 @@ def do_query():
 
     sales = Sales.select().where(
         Sales.saler_id == salesman_id, start_date < date)
-    return render_template('query_result.html', sales=sales)
+    return render_template('query_result.html', sales=sales, )
