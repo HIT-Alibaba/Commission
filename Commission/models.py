@@ -13,7 +13,7 @@ class User(BaseModel):
     id = peewee.PrimaryKeyField()
     username = peewee.CharField(max_length=64)
     password = peewee.CharField(max_length=64)
-    level = peewee.IntegerField()
+    level = peewee.IntegerField()  # 0: Salseman, 1 Gunsmith
 
 
 class Sale(BaseModel):

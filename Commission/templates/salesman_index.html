@@ -68,7 +68,7 @@ Hello, {{ g.user.username }}
 
 &nbsp;
 
-<button onclick="return openMonthReport()" {% if not(early_finish or (left_locks == 0 and left_stocks == 0 and left_barrels == 0)) %} disabled="disabled" {% endif %} class="btn btn-default">Monthly Report</button>
+<button onclick="return openMonthReport()" {% if not(early_finish and (left_locks == 0 and left_stocks == 0 and left_barrels == 0)) %} disabled="disabled" {% endif %} class="btn btn-default">Monthly Report</button>
 
 </form>
 </div>
@@ -83,13 +83,13 @@ Hello, {{ g.user.username }}
 var checkInput = function() {
 	var locks = $("#form_locks");
 	var stocks = $("form_stocks");
-	var barrels = $("form_barrels")
+	var barrels = $("form_barrels");
 
-	if (locks.val() == 0 && stocks.val() == 0 && barrels.val() == 0) {
+	if (locks.val() === 0 && stocks.val() === 0 && barrels.val() === 0) {
 		return false;
 	}
 	return true;
-}
+};
 
 var finishThisMonth = function() {
 	var locks = $("#form_locks");
@@ -102,12 +102,12 @@ var finishThisMonth = function() {
 	stocks.val("-1");
 	barrels.val("-1");
 
-}
+};
 
 var openMonthReport = function() {
 	location.href = "/query/this_month";
 	return false;
-}
+};
 </script>
 {% endif %}
 {% endblock %}

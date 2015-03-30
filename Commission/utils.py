@@ -15,23 +15,21 @@ def date_from_string(_str):
 
 
 def get_total_sales(user, year, month):
-    _sales = []
-    target_date_start = date(int(year), int(month), 1)
-    target_date_end = date(int(year), int(month + 1), 1)
-    for sale in user.sales:
-        if target_date_start <= sale.date < target_date_end and sale.locks >= 0:
-            _sales.append(sale)
-
     total_locks = 0
     total_stocks = 0
     total_barrels = 0
     early_finish = False
-    for sale in _sales:
-        total_locks += sale.locks
-        total_stocks += sale.stocks
-        total_barrels += sale.barrels
+
+    target_date_start = date(int(year), int(month), 1)
+    target_date_end = date(int(year), int(month + 1), 1)
+    for sale in user.sales:
+        if target_date_start <= sale.date < target_date_end and sale.locks >= 0:
+            total_locks += sale.locks
+            total_stocks += sale.stocks
+            total_barrels += sale.barrels
         if sale.locks == -1:
             early_finish = True
+
     return (total_locks, total_stocks, total_barrels, early_finish)
 
 

@@ -16,8 +16,7 @@
 	  	</div>
 
 	  	<ul class="nav navbar-nav">
-        <li><a href="/salesman">New sale <span class="sr-only">(current)</span></a></li>
-        <li class="active"><a href="/query">Query</a></li>
+        <li class="active"><a href="/do_query">Query <span class="sr-only">(current)</span></a></li>
         </ul>
 
 		<ul class="nav navbar-nav navbar-right"> 
@@ -42,9 +41,6 @@ Hello, {{ g.user.username }}
 {% endif %}
 {% endfor %}
 
-
-<div class="row">
-
  <div class="col-md-4 col-md-offset-4">
 <h3>Query</h3>
 <br>
@@ -61,14 +57,13 @@ Hello, {{ g.user.username }}
 
  </div>
  
- <div class="form-group">
+<div class="form-group">
   <label>Year</label>
   <select class="form-control" name="year">
 {% for y in range(2000, 2020) %}
   <option value="{{ y }}">{{ y }}</option>
 {% endfor %}
 </select>
-
   </div>
 
    <div class="form-group">
@@ -79,7 +74,6 @@ Hello, {{ g.user.username }}
 {% endfor %}
   </select>
   </div>
-
    <center><button type="submit" class="btn btn-default">Submit</button></center>
 
 </form>

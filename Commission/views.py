@@ -50,13 +50,23 @@ def admin_required(f):
 
 @app.route("/", methods=["GET"])
 def index():
-    return render_template("index.html")
+    if g.user:
+        if g.user.id == 0:
+            return redirect(url_for('salesman_index'))
+        elif g.user.id == 1:
+            return redirect(url_for('gunsmith_index'))
+
+    return redirect(url_for('login'))
 
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
     if g.user:
-        return redirect(url_for('salesman_index'))
+        if g.user.id == 0:
+            return redirect(url_for('salesman_index'))
+        elif g.user.id == 1:
+            return redirect(url_for('gunsmith_index'))
+
     form = LoginForm()
     error = None
     if request.method == 'POST':
@@ -73,7 +83,11 @@ def login():
                 else:
                     session['user_id'] = user.id
                     session['user_level'] = user.level
-                    return redirect(url_for('salesman_index'))
+                    if user.level == 0:
+                        return redirect(url_for('salesman_index'))
+                    elif user.level == 1:
+                        return redirect(url_for('gunsmith_index'))
+
     if error:
         flash(error, category='error')
     return render_template("login.html", form=form, title="Login")
@@ -84,14 +98,13 @@ def logout():
     """Logs the user out."""
     flash('You were logged out', category='info')
     session.pop('user_id', None)
-    return redirect(url_for('index'))
+    session.pop('user_level', None)
+    return redirect(url_for('login'))
 
 
+@login_required
 @app.route("/salesman", methods=["GET"])
 def salesman_index():
-    if not g.user:
-        return redirect(url_for('login'))
-
     d = date.today()
     total_locks, total_stocks, total_barrels, early_finish = get_total_sales(
         g.user, d.year, d.month)
@@ -100,8 +113,16 @@ def salesman_index():
     left_barrels = AVAILABLE_BARRELS - total_barrels
     if early_finish:
         left_locks = left_stocks = left_barrels = 0
+    print("Early Finish: " + str(early_finish))
     return render_template('salesman_index.html', title="Salesman",
                            left_locks=left_locks, left_stocks=left_stocks, left_barrels=left_barrels, early_finish=early_finish)
+
+
+@login_required
+@app.route("/gunsmith", methods=["GET"])
+def gunsmith_index():
+    allowed_users = User.select().where(User.level == 0)
+    return render_template('gunsmith_index.html', title="Query", users=allowed_users)
 
 
 @login_required
@@ -136,26 +157,41 @@ def sale():
     return redirect(url_for('salesman_index'))
 
 
+@login_required
 @app.route("/query", methods=["GET"])
 def query_sales():
     allowed_users = [g.user]
     return render_template('query_index.html', title="Query", users=allowed_users)
 
 
+@login_required
 @app.route("/do_query", methods=["POST"])
 def do_query():
     salesman_id = request.form['id']
-    start_date = date_from_string(request.form['start'])
-    end_date = date_from_string(request.form['end'])
-    if start_date > end_date:
+    year = int(request.form['year'])
+    month = int(request.form['month'])
+
+    start_date = date(year, month, 1)
+    end_date = date(year, month + 1, 1)
+
+    d = date.today()
+    if date(year, month, 1) > d:
         flash("Date not valid", category='error')
         return redirect(url_for('query_sales'))
 
-    sales = Sales.select().where(
-        Sales.saler_id == salesman_id, start_date < date, locks != -1)
-    return render_template('query_result.html', sales=sales, title="Query Result", )
+    sales = []
+    salesman = User.get(User.id == salesman_id)
+    for sale in salesman.sales:
+        if start_date <= sale.date < end_date and sale.locks >= 0:
+            sales.append(sale)
+
+    total_locks, total_stocks, total_barrels, _ = get_total_sales(
+        salesman, year, month)
+    commission = get_commission(total_locks, total_stocks, total_barrels)
+    return render_template('query_result.html', sales=sorted(sales, key=lambda x:x.date.day), title="Result", total_locks=total_locks, total_stocks=total_stocks, total_barrels=total_barrels, commission=commission)
 
 
+@login_required
 @app.route("/query/this_month", methods=["GET"])
 def query_this_month():
     salesman = g.user
@@ -168,6 +204,7 @@ def query_this_month():
         if start_date <= sale.date < end_date and sale.locks >= 0:
             results.append(sale)
 
-    total_locks, total_stocks, total_barrels,_ = get_total_sales(salesman, d.year, d.month)
+    total_locks, total_stocks, total_barrels, _ = get_total_sales(
+        salesman, d.year, d.month)
     commission = get_commission(total_locks, total_stocks, total_barrels)
-    return render_template('query_result.html', sales=results, title="Report", total_locks=total_locks, total_stocks=total_stocks, total_barrels=total_barrels, commission=commission)
+    return render_template('query_result.html', sales=sorted(results, key=lambda x:x.date.day), title="Report", total_locks=total_locks, total_stocks=total_stocks, total_barrels=total_barrels, commission=commission)
