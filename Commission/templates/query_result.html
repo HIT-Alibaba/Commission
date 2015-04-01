@@ -17,8 +17,10 @@
 	  	</div>
 
 	  	<ul class="nav navbar-nav">
+      {% if g.user.level == 0 %}
         <li><a href="/salesman">New sale <span class="sr-only">(current)</span></a></li>
-        <li class="active"><a href="/query">Query</a></li>
+      {% endif %}
+        <li class="active"><a href="{% if g.user.level == 0 %}/query{% else %}/gunsmith{% endif %}">Query</a></li>
         </ul>
 
 		<ul class="nav navbar-nav navbar-right"> 
