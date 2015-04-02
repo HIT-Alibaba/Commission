@@ -37,6 +37,11 @@ def is_qualified_for_commission(total_locks, total_stocks, total_barrels):
     return not(total_locks == 0 or total_stocks == 0 or total_barrels == 0)
 
 
+def get_total_sales_before_commission(total_locks, total_stocks, total_barrels):
+    return total_locks * LOCKS_PRICE + total_stocks * \
+            STOCKS_PRICE + total_barrels * BARRELS_PRICE
+        
+            
 def get_commission(total_locks, total_stocks, total_barrels):
     result = 0
     if is_qualified_for_commission(total_locks, total_stocks, total_barrels):
