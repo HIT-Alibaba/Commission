@@ -32,6 +32,15 @@
 <h3>Report</h3>
 
 <div class="row">
+  <div class="col-md-8 col-md-offset-2">
+  <div id="chart" style="height: 500px; border: 1px solid rgb(204, 204, 204); padding: 10px; background-color: transparent; cursor: default;"></div>
+  </div>
+</div>
+
+<br>
+<br> <!-- guo gao yang tong xue rang gai dao shang mian-->
+
+<div class="row">
 <div class="col-md-8 col-md-offset-2">
 
 <table class="table">
@@ -72,11 +81,7 @@
 
 <br>
 
-<div class="row">
-	<div class="col-md-8 col-md-offset-2">
-	<div id="chart" style="height: 500px; border: 1px solid rgb(204, 204, 204); padding: 10px; background-color: transparent; cursor: default;"></div>
-	</div>
-</div>
+
 <script type="text/javascript" src="{{ url_for('static', filename='js/echarts-all.js') }}"></script>
 <script type="text/javascript">
 	var myChart = echarts.init(document.getElementById('chart'));
