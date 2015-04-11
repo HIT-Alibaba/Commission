@@ -172,7 +172,9 @@ def do_query():
     month = int(request.form['month'])
 
     start_date = date(year, month, 1)
-    end_date = date(year, month + 1, 1)
+    if month == 12:
+        year += 1
+    end_date = date(year, (month + 1) % 12, 1)
 
     d = date.today()
     if date(year, month, 1) > d:
@@ -197,7 +199,9 @@ def query_this_month():
     salesman = g.user
     d = date.today()
     start_date = date(d.year, d.month, 1)
-    end_date = date(d.year, d.month + 1, 1)
+    if d.month == 12:
+        d.year += 1
+    end_date = date(d.year, (d.month + 1) % 12, 1)
 
     results = []
     for sale in salesman.sales:

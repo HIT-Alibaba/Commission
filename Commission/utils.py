@@ -21,7 +21,9 @@ def get_total_sales(user, year, month):
     early_finish = False
 
     target_date_start = date(int(year), int(month), 1)
-    target_date_end = date(int(year), int(month + 1), 1)
+    if int(month) == 12:
+        year = int(year) + 1
+    target_date_end = date(int(year), int(month + 1) % 12, 1)
     for sale in user.sales:
         if target_date_start <= sale.date < target_date_end and sale.locks >= 0:
             total_locks += sale.locks
